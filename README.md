@@ -1,1 +1,1 @@
-# messenger
+# XMPP Server & Client
