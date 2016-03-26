@@ -1,2 +1,5 @@
 # XMPP-like Server & Client
-![Image alt](https://github.com/gregorymel/Messenger/raw/gettingStarted/Docs/UML_diagram.jpg)
+> Client
+![Image alt](https://github.com/gregorymel/Messenger/raw/gettingStarted/Docs/UML_diagram_client.jpg)
+> Server
+![Image alt](https://github.com/gregorymel/Messenger/raw/gettingStarted/Docs/UML_diagram_server.jpg)
