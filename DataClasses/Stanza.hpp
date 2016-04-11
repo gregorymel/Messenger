@@ -5,25 +5,25 @@
 #include <string>
 #include <list>
 //Local headers
-#include <JID.hpp>
+#include "JID.hpp"
 
 class Stanza
 {
     protected:
-        JID _from;
-        JID _to;
+        JID from;
+        JID to;
         enum StanzaType
         {
             MESSAGE = 0,
             PRESENCE,
             IQ,
-            ROASTER,
+	    ROASTER,
             MAX_STANZA_TYPE
         };
         StanzaType type;
-        enum SubType
-        {
-            CHAT = 0,
+	enum SubType
+	{
+	    CHAT = 0,
             PRIVATE,
             AVAILABLE,
             UNAVAILABLE,
@@ -32,22 +32,22 @@ class Stanza
             RESULT,
             ERROR,
             MAX_SUBTYPE
-        };
-        SubType subType;
-        std::string body;
-        std::list<JID> availabilityList;
+	};
+	SubType subType;
+	std::string body;
+	std::list<JID> availabilityList;     
     public:
         Stanza( JID from, JID to );
         Stanza( const Stanza &obj );
         ~Stanza();
         void setLang( std::string language );
         StanzaType getStanzaType();
-        SubType getSubType();
-        JID from();
-        JID to();
-        void load(const std::string &filename);
-        void save(const std::string &filename);
-        std::list<JID>& getAvailable();
+	SubType getSubType();
+        JID getFrom();
+        JID getTo();
+	void load(const std::string &filename);
+	void save(const std::string &filename);
+	std::list<JID>& getAvailable();
         void addAvailable( JID newJID );
 };
 

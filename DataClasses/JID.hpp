@@ -14,6 +14,30 @@ class JID
         JID( std::string raw );
         JID ( const JID &obj );
         ~JID();
+	void setNode(std::string str)
+	{
+		node = str;
+	}
+	void setDomain(std::string str)
+	{
+		domain = str;
+	}
+	void setResource(std::string str)
+	{
+		resource = str;
+	}
+	std::string getNode()
+	{
+		return node;
+	}
+	std::string getDomain()
+	{
+		return domain;
+	}
+	std::string getResource()
+	{
+		return resource;
+	}
 };
 
 #endif //JID_HPP
