@@ -8,10 +8,10 @@ void Stanza::load(const std::string &str)
 	ptree pt;
 
 	read_xml(str, pt);
-		
-	from = pt.get<JID>("Stanza.from");
-	
-	to = pt.get<JID>("Stanza.to");
+
+	_from = pt.get<JID>("Stanza.from");
+
+	_to = pt.get<JID>("Stanza.to");
 
 	type = pt.get<StanzaType>("Stanza.Type");
 
@@ -54,10 +54,10 @@ void Stanza::save(const std::string &str)
 	using boost::property_tree::ptree;
 	ptree pt;
 
-	pt.put("Stanza.from", from);
-	pt.put("Stanza.to", to);
+	pt.put("Stanza.from", _from);
+	pt.put("Stanza.to", _to);
 	pt.put("Stanza.Type",type);
-	
+
 	switch ( type )
         {
                 case MESSAGE :

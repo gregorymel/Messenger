@@ -10,20 +10,20 @@
 class Stanza
 {
     protected:
-        JID from;
-        JID to;
+        JID _from;
+        JID _to;
         enum StanzaType
         {
             MESSAGE = 0,
             PRESENCE,
             IQ,
-	    ROASTER,
+            ROASTER,
             MAX_STANZA_TYPE
-        }
+        };
         StanzaType type;
-	enum SubType
-	{
-	    CHAT = 0,
+        enum SubType
+        {
+            CHAT = 0,
             PRIVATE,
             AVAILABLE,
             UNAVAILABLE,
@@ -32,22 +32,22 @@ class Stanza
             RESULT,
             ERROR,
             MAX_SUBTYPE
-	}
-	SubType subType;
-	std::string body;
-	std::list<JID> availabilityList;     
+        };
+        SubType subType;
+        std::string body;
+        std::list<JID> availabilityList;
     public:
         Stanza( JID from, JID to );
         Stanza( const Stanza &obj );
         ~Stanza();
         void setLang( std::string language );
-        stanzaType getStanzaType();
-	SubType getSubType();
+        StanzaType getStanzaType();
+        SubType getSubType();
         JID from();
         JID to();
-	void load(const std::string &filename);
-	void save(const std::string &filename);
-	std::list<JID>& getAvailable();
+        void load(const std::string &filename);
+        void save(const std::string &filename);
+        std::list<JID>& getAvailable();
         void addAvailable( JID newJID );
 };
 
