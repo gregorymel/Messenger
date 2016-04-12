@@ -7,7 +7,6 @@ Server::Server( int port ) :
     _acceptor( _service, boost::asio::ip::tcp::endpoint( boost::asio::ip::tcp::v4(), port ) ),
     _connections()
 {
-    std::cout << "Creating object of the server class..." << std::endl;
 }
 
 void Server::handleAccept( Connection::ptr connect, const boost::system::error_code& err )
@@ -23,7 +22,7 @@ void Server::handleAccept( Connection::ptr connect, const boost::system::error_c
 
 void Server::start()
 {
-    std::cout << "Starting server..." << std::endl;                 //Debug
+    std::cout << "Starting server..." << std::endl;
     _status = AVAILABLE;
 
     Connection::ptr new_connect = Connection::new_( *this );
@@ -39,6 +38,7 @@ Server::Status Server::getStatus()
 void Server::addConnection( Connection::ptr newConnection )
 {
     std::cout << newConnection->userName() <<" added to the list..." << std::endl;
+
     _connections.push_back( newConnection );
     _clientsChanged = true;
 }
@@ -46,6 +46,7 @@ void Server::addConnection( Connection::ptr newConnection )
 void Server::deleteConnection( Connection::ptr closedConnection )
 {
     std::cout << "Deleting connection " << closedConnection->userName() << std::endl;
+
     std::vector<Connection::ptr>::iterator it = std::find( _connections.begin(),
                                                            _connections.end(),
                                                            closedConnection );
@@ -55,7 +56,10 @@ void Server::deleteConnection( Connection::ptr closedConnection )
 
 void Server::stop()
 {
+    std::vector<Connection::ptr>::iterator it = _connections.begin();
 
+    while ( it != _connections.end() )
+        (*it)->stop();
 }
 
 

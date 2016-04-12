@@ -28,7 +28,7 @@ class Connection : public boost::enable_shared_from_this<Connection>, boost::non
         //std::queue<Stanza> _received;
         //std::queue<Stanza> _toSend;
 
-        enum { max_len = 1024 };
+        enum { max_len = 4096 };
         std::string _strWriteBuffer;
         std::string _strReadBuffer;
         char _writeBuffer[max_len];
@@ -86,9 +86,8 @@ class Server
 
         boost::asio::io_service _service;
         boost::asio::ip::tcp::acceptor _acceptor;
-
-        Status _status;
         std::vector<Connection::ptr> _connections;
+        Status _status;
         bool _clientsChanged;
 
     public:

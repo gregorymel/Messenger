@@ -9,14 +9,16 @@ Connection::Connection( Server& server ) :
 
 void Connection::start()
 {
-    std::cout << "Starting connection with " << _userName << std::endl;
+    std::cout << "Starting new unauthorized connection" << std::endl;
+
     _started = true;
     doRead();
 }
 
 void Connection::doRead()
 {
-    std::cout << "Do read..." << std::endl;
+    std::cout << "Reading..." << std::endl;
+
     boost::asio::async_read( _socket, boost::asio::buffer( _readBuffer ),
     boost::bind( &Connection::readComplete, this, _1, _2 ),
     boost::bind( &Connection::onRead, this, _1, _2 ) );
@@ -24,9 +26,10 @@ void Connection::doRead()
 
 size_t Connection::readComplete( const boost::system::error_code& err, size_t bytes )
 {
-    std::cout << "Read complete..." << std::endl;
+    //std::cout << "Read complete?" << std::endl;
+
     if ( err )
-        return 0;
+        stop();
 
     bool found = std::find( _readBuffer, _readBuffer + bytes, '\n') < _readBuffer + bytes;
 
@@ -39,6 +42,7 @@ size_t Connection::readComplete( const boost::system::error_code& err, size_t by
 void Connection::onRead( const boost::system::error_code& err, size_t bytes )
 {
     std::cout << "On read..." << std::endl;
+
 	if ( err )
         stop();
 
@@ -47,6 +51,7 @@ void Connection::onRead( const boost::system::error_code& err, size_t bytes )
 
 	std::string msg( _readBuffer, bytes );
 
+
 	if ( msg.find( "login:" ) == 0 )
         onLogin( msg );
 	else
@@ -54,7 +59,7 @@ void Connection::onRead( const boost::system::error_code& err, size_t bytes )
             onClients();
 }
 
-void Connection::onWrite(const boost::system::error_code& err, size_t bytes)
+void Connection::onWrite( const boost::system::error_code& err, size_t bytes )
 {
     std::cout << "On write..." << std::endl;
     doRead();

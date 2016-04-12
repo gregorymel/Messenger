@@ -27,6 +27,9 @@ Connection.o: Connection.cpp Server.hpp
 server_main.o: server_main.cpp Server.hpp
 	$(CC) $(STANDART) $(COMPILER_FLGS) -c $< $(INCL)
 
+#Stanza.o: Stanza.cpp Stanza.hpp JID.hpp
+#	$(CC) $(STANDART) $(COMPILER_FLGS) -c $< $(INCL)
+
 clean:
 	rm -f *.o
 	rm -f server
