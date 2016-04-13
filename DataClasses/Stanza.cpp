@@ -2,13 +2,18 @@
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/foreach.hpp>
 #include "Stanza.hpp"
+#include <sstream> 
+
 
 void Stanza::load(const std::string &str)
 {
 	using boost::property_tree::ptree;
 	ptree pt;
+	std::stringstream ss;
+	
+	ss.str(str);
 
-	read_xml(str, pt);
+	read_xml(ss, pt);
 		
 	from.setNode(pt.get<std::string>("Stanza.from.Node"));
 	from.setDomain(pt.get<std::string>("Stanza.from.Domain"));
@@ -55,11 +60,12 @@ void Stanza::load(const std::string &str)
 
 
 
-void Stanza::save(const std::string &str)
+void Stanza::save( std::string &str)
 {
 	using boost::property_tree::ptree;
 	ptree pt, node;
 	std::string tmp;
+	std::stringstream ss;
 	
 	pt.put("Stanza.from.Node", from.getNode());
 	pt.put("Stanza.from.Domain", from.getDomain());
@@ -105,5 +111,58 @@ void Stanza::save(const std::string &str)
                         break;
                 }
         }
-   	write_xml(str, pt);
+   	write_xml(ss, pt);
+	str = ss.str();
+}
+
+Stanza::StanzaType Stanza::getStanzaType()
+{
+	return type;
+}
+
+Stanza::SubType Stanza::getSubType()
+{
+	return subType;
+}
+
+JID Stanza::getFrom()
+{
+	return from;
+}
+        
+JID Stanza::getTo()
+{
+	return to;
+}
+
+void Stanza::setStanzaType(StanzaType val)
+{
+	type = val;
+}
+
+void Stanza::setSubType(SubType val)
+{
+	subType = val;
+}
+
+void Stanza::setFrom( JID id)
+{	
+	from = id;
+}
+        
+void Stanza::setTo( JID id)
+{
+	to = id;
+}
+
+void Stanza::setMSG(SubType val, std::string msg)
+{
+	type = MESSAGE;	
+	subType = val;
+	body = msg;
+}
+
+std::string Stanza::getMSG()
+{
+	return body;
 }

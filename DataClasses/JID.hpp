@@ -11,9 +11,10 @@ class JID
         std::string domain;
         std::string resource;
     public:
-        JID( std::string raw );
-        JID ( const JID &obj );
-        ~JID();
+	JID(){};        
+	JID( std::string raw ){};
+        JID ( const JID &obj ){};
+        ~JID(){};
 	void setNode(std::string str)
 	{
 		node = str;
@@ -37,6 +38,14 @@ class JID
 	std::string getResource()
 	{
 		return resource;
+	}
+	
+	JID& operator=(JID copied) 
+	{
+		node = copied.getNode();
+		domain = copied.getDomain();
+		resource = copied.getResource();
+		return *this;
 	}
 };
 
