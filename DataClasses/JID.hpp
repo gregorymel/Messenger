@@ -1,6 +1,4 @@
-#ifndef JID_HPP
-#define JID_HPP
-
+#pragma once
 //Standart C++ libraries
 #include <string>
 
@@ -11,10 +9,23 @@ class JID
         std::string domain;
         std::string resource;
     public:
-	JID(){};        
+	JID(){};
 	JID( std::string raw ){};
-        JID ( const JID &obj ){};
-        ~JID(){};
+    JID( const JID& obj ) :
+        node( obj.getNode()),
+        domain( obj.getDomain()),
+        resource( obj.getResource())
+    {};
+    JID& operator=(const JID& copied)
+	{
+		node = copied.getNode();
+		domain = copied.getDomain();
+		resource = copied.getResource();
+		return *this;
+	}
+
+    ~JID(){};
+
 	void setNode(std::string str)
 	{
 		node = str;
@@ -27,26 +38,16 @@ class JID
 	{
 		resource = str;
 	}
-	std::string getNode()
+	std::string getNode() const
 	{
 		return node;
 	}
-	std::string getDomain()
+	std::string getDomain() const
 	{
 		return domain;
 	}
-	std::string getResource()
+	std::string getResource() const
 	{
 		return resource;
 	}
-	
-	JID& operator=(JID copied) 
-	{
-		node = copied.getNode();
-		domain = copied.getDomain();
-		resource = copied.getResource();
-		return *this;
-	}
 };
-
-#endif //JID_HPP
