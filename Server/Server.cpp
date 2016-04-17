@@ -30,11 +30,6 @@ void Server::start()
     boost::bind( &Server::handleAccept, this, new_connect, _1 ) );
 }
 
-Server::Status Server::getStatus()
-{
-    return _status;
-}
-
 void Server::addConnection( Connection::ptr newConnection )
 {
     std::cout << newConnection->userName() <<" added to the list..." << std::endl;
@@ -54,12 +49,48 @@ void Server::deleteConnection( Connection::ptr closedConnection )
     _clientsChanged = true;
 }
 
+void Server::addAccount( std::pair<std::string, std::string> newAcc )
+{
+    std::cout << "Account added..." << std::endl;
+    _accounts.insert( newAcc );
+}
+
+void Server::deleteAccount( const std::string login )
+{
+    std::cout << "Account deleted..." << std::endl;
+    _accounts.erase( login );
+}
+
+bool Server::checkAccount( const std::string login )
+{
+    if ( _accounts.find( login ) == _accounts.end() )
+        return false;
+
+    return true;
+}
+
+bool Server::checkLoginAndPassword( std::pair<std::string, std::string> acc )
+{
+    std::map<std::string, std::string>::iterator it = _accounts.find( std::get<0>(acc) );
+
+    if ( it == _accounts.end() )
+        return false;
+
+    if ( std::get<1>(*it) != std::get<1>(acc) )
+        return false;
+
+    return true;
+}
+
 void Server::stop()
 {
     std::vector<Connection::ptr>::iterator it = _connections.begin();
 
     while ( it != _connections.end() )
+    {
         (*it)->stop();
+        it = _connections.begin();
+    }
 }
 
 

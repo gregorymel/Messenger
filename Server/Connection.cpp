@@ -12,7 +12,7 @@ void Connection::start()
     std::cout << "Starting new unauthorized connection" << std::endl;
 
     _started = true;
-    doRead();
+    this->doRead();
 }
 
 void Connection::doRead()
@@ -20,16 +20,16 @@ void Connection::doRead()
     std::cout << "Reading..." << std::endl;
 
     boost::asio::async_read( _socket, boost::asio::buffer( _readBuffer ),
-    boost::bind( &Connection::readComplete, this, _1, _2 ),
-    boost::bind( &Connection::onRead, this, _1, _2 ) );
+    boost::bind( &Connection::readComplete, shared_from_this(), _1, _2 ),
+    boost::bind( &Connection::onRead, shared_from_this(), _1, _2 ) );
 }
 
 size_t Connection::readComplete( const boost::system::error_code& err, size_t bytes )
 {
-    //std::cout << "Read complete?" << std::endl;
+    std::cout << std::string( _readBuffer ) << std::endl;
 
     if ( err )
-        stop();
+        return 0 ;
 
     bool found = std::find( _readBuffer, _readBuffer + bytes, '\n') < _readBuffer + bytes;
 
@@ -44,19 +44,21 @@ void Connection::onRead( const boost::system::error_code& err, size_t bytes )
     std::cout << "On read..." << std::endl;
 
 	if ( err )
-        stop();
+        this->stop();
 
 	if ( !_started )
         return;
 
 	std::string msg( _readBuffer, bytes );
-
+	std::cout << " Message from client: " << msg << std::endl;
 
 	if ( msg.find( "login:" ) == 0 )
-        onLogin( msg );
+        this->onLogin( msg );
 	else
-        if ( msg.find( "ask_clients" ) == 0 )
-            onClients();
+        if ( msg.find( "clients" ) == 0 )
+            this->onClients();
+        else
+            doWrite( msg );
 }
 
 void Connection::onWrite( const boost::system::error_code& err, size_t bytes )
@@ -65,25 +67,30 @@ void Connection::onWrite( const boost::system::error_code& err, size_t bytes )
     doRead();
 }
 
-void Connection::onLogin( const std::string& msg )
+void Connection::onLogin( const std::string msg )
 {
     std::cout << "On login..." << std::endl;
 	_userName = msg.substr( 6, std::string::npos );
-	std::string answer("login OK---Your name:");
+
+	std::pair<std::string,std::string> newAccount( _userName, std::string( "null" ) );
+	_myServer.addAccount( newAccount );
+
+	std::string answer( "login OK---Your name: " );
 	answer += _userName;
 	doWrite( answer );
 	_myServer.setClientsChanged( true );
 }
 
-void Connection::doWrite( const std::string& msg )
+void Connection::doWrite( const std::string msg )
 {
     std::cout << "Do write..." << std::endl;
 	if ( !_started )
         return;
 
 	std::copy( msg.begin(), msg.end(), _writeBuffer );
+	std::cout << " Message to client: " << std::string(_writeBuffer, msg.size()) << std::endl;
 	_socket.async_write_some( boost::asio::buffer( _writeBuffer, msg.size() ),
-	boost::bind( &Connection::onWrite, this, _1, _2 ) );
+	boost::bind( &Connection::onWrite, shared_from_this(), _1, _2 ) );
 }
 
 void Connection::onClients()
