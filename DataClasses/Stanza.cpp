@@ -51,6 +51,11 @@ void Stanza::load(const std::string &str)
 			}
 			break;
 		}
+		case EVENT:
+		{
+			subType = static_cast<SubType>(pt.get<int>("Stanza.Event.type"));
+			break;
+		}
 		default :
 		{
 			return;
@@ -107,6 +112,11 @@ void Stanza::save( std::string &str)
             }
             break;
         }
+		case EVENT:
+		{
+			pt.put("Stanza.EVENT.type", static_cast<int>(subType));
+			break;
+		}
         default :
         {
             break;
