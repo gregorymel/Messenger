@@ -12,15 +12,25 @@ class Stanza
     public:
         enum SubType
         {
+			// message
             CHAT = 0,
             PRIVATE,
+			// presense
             AVAILABLE,
             UNAVAILABLE,
+			// IQ
             GET,
             SET,
             RESULT,
+			SIGNIN,
+            SIGNUP,
+			// EVENT
+			BEGIN,
+			END,			
+
             ERROR,
-            MAX_SUBTYPE
+
+            MAX_SUBTYPE,
         };
         enum StanzaType
         {
@@ -28,10 +38,11 @@ class Stanza
             PRESENCE,
             IQ,
             ROASTER,
+			EVENT,
             MAX_STANZA_TYPE
         };
         Stanza(){};
-        Stanza( JID from, JID to ){};
+        Stanza( JID _from, JID _to ) : from( _from), to( _to){};
         Stanza( const Stanza &obj ){};
         ~Stanza(){};
         StanzaType getStanzaType();
