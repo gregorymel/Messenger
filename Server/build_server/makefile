@@ -15,7 +15,7 @@ INCL = -I $(ROOT_DIR)/DataClasses/ -I $(ROOT_DIR)/Server/
 
 all: server
 
-server: server_main.o Server.o Connection.o
+server: server_main.o Server.o Connection.o Stanza.o
 	$(CC) $(STANDART) -o $@ $^ $(LINKER_FLGS)
 
 Server.o: Server.cpp Server.hpp

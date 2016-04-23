@@ -4,8 +4,7 @@
 Server::Server( int port ) :
     _service(),
     _status( UNAVAILABLE ),
-    _acceptor( _service, boost::asio::ip::tcp::endpoint( boost::asio::ip::tcp::v4(), port ) ),
-    _connections()
+    _acceptor( _service, boost::asio::ip::tcp::endpoint( boost::asio::ip::tcp::v4(), port ) )
 {
 }
 
@@ -15,9 +14,9 @@ void Server::handleAccept( Connection::ptr connect, const boost::system::error_c
     connect->start();
     this->addConnection( connect );
 
-	Connection::ptr new_connect = Connection::new_( *this );
-	_acceptor.async_accept( new_connect->socket(),
-    boost::bind( &Server::handleAccept, this, new_connect, _1 ) );
+	Connection::ptr newConnect = Connection::new_( *this );
+	_acceptor.async_accept( newConnect->socket(),
+    boost::bind( &Server::handleAccept, this, newConnect, _1 ) );
 }
 
 void Server::start()
@@ -25,33 +24,35 @@ void Server::start()
     std::cout << "Starting server..." << std::endl;
     _status = AVAILABLE;
 
-    Connection::ptr new_connect = Connection::new_( *this );
-    _acceptor.async_accept( new_connect->socket(),
-    boost::bind( &Server::handleAccept, this, new_connect, _1 ) );
+    Connection::ptr newConnect = Connection::new_( *this );
+    _acceptor.async_accept( newConnect->socket(),
+    boost::bind( &Server::handleAccept, this, newConnect, _1 ) );
 }
 
 void Server::addConnection( Connection::ptr newConnection )
 {
-    std::cout << newConnection->userName() <<" added to the list..." << std::endl;
+    std::cout << "Connection added to the list..." << std::endl;
 
-    _connections.push_back( newConnection );
+    _connections.insert( std::pair<std::string, Connection::ptr> ( "unknown", newConnection ) );
     _clientsChanged = true;
 }
 
-void Server::deleteConnection( Connection::ptr closedConnection )
+void Server::deleteConnection( std::string login )
 {
-    std::cout << "Deleting connection " << closedConnection->userName() << std::endl;
+    std::cout << "Deleting connection " << login << std::endl;
 
-    std::vector<Connection::ptr>::iterator it = std::find( _connections.begin(),
-                                                           _connections.end(),
-                                                           closedConnection );
-    _connections.erase( it );
+    _connections.erase( _connections.find( login ) );
     _clientsChanged = true;
 }
 
-void Server::addAccount( std::pair<std::string, std::string> newAcc )
+void Server::addAccount( std::string login, std::string pass )
 {
     std::cout << "Account added..." << std::endl;
+
+    std::pair<std::string, Data> newAcc;
+    newAcc.first = login;
+    newAcc.second.password = pass;
+
     _accounts.insert( newAcc );
 }
 
@@ -69,28 +70,32 @@ bool Server::checkAccount( const std::string login )
     return true;
 }
 
-bool Server::checkLoginAndPassword( std::pair<std::string, std::string> acc )
+bool Server::checkLoginAndPassword( std::string login, std::string pass )
 {
-    std::map<std::string, std::string>::iterator it = _accounts.find( std::get<0>(acc) );
+    std::map<std::string, Data>::iterator it = _accounts.find( login );
 
     if ( it == _accounts.end() )
         return false;
 
-    if ( std::get<1>(*it) != std::get<1>(acc) )
-        return false;
+    return ( std::get<1>(*it).password == pass );
+}
 
-    return true;
+void Server::goOnline( std::string login )
+{
+    std::cout << login << " online..." << std::endl;
+
+    _online.insert( login );
+}
+
+void Server::goOffline( std::string login )
+{
+    std::cout << login << " offline..." << std::endl;
+
+    _online.erase( login );
 }
 
 void Server::stop()
 {
-    std::vector<Connection::ptr>::iterator it = _connections.begin();
-
-    while ( it != _connections.end() )
-    {
-        (*it)->stop();
-        it = _connections.begin();
-    }
 }
 
 
