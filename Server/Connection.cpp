@@ -123,7 +123,7 @@ void Connection::onMessage( Stanza st )
     {
         Stanza ans;
         ans.setStanzaType( Stanza::IQ );
-        ans.setMSG( Stanza::RESULT, "REJECTED" );
+        ans.setSubType( Stanza::ERROR );
         std::string strAns;
         ans.save( strAns );
 
@@ -134,14 +134,34 @@ void Connection::onMessage( Stanza st )
     resend( st );
 }
 
-void Connection::resend( Stanza st )
+void Connection::store()
 {
-    std::get<1>(*(_myServer.connections().find( _login )) )->store( st );
+    if ( _received.empty() )
+        return;
+
+    Server::Data& storage = std::get<1>(*(_myServer.accounts().find( _login ))) ;
+
+    while ( !_received.empty() )
+    {
+        storage.newMessages.push( _received.front() );
+        _received.pop_front();
+    }
 }
 
-void Connection::store( Stanza st )
+void Connection::retrieve()
 {
-    _received.push_back( st );
+    Server::Data& storage = std::get<1>(*(_myServer.accounts().find( _login ))) ;
+
+    while ( !storage.newMessages.empty() )
+    {
+        _received.push_front( storage.newMessages.front() );
+        storage.newMessages.pop();
+    }
+}
+
+void Connection::resend( Stanza st )
+{
+    std::get<1>(*(_myServer.connections().find( _login )) )->_received.push_back( st );
 }
 
 void Connection::onPresence()
@@ -157,60 +177,79 @@ void Connection::onRequest( Stanza st )
     switch ( st.getSubType() )
     {
         case Stanza::SIGNIN:
+        {
             onLogin( st );
             break;
-
+        }
         case Stanza::SIGNUP:
+        {
             onRegister( st );
             break;
-
+        }
         case Stanza::GET:
-
-
-            Stanza event;
-            event.setStanzaType( Stanza::EVENT );
-            event.setMSG( Stanza::BEGIN, "" );
-            _received.push_front( event );
-            event.setMSG( Stanza::END, "");
-            _received.push_back( event );
+        {
+            Stanza ev;
+            ev.setStanzaType( Stanza::EVENT );
+            ev.setSubType( Stanza::BEGIN );
+            _received.push_front( ev );
+            ev.setSubType( Stanza::END );
+            _received.push_back( ev );
 
             doWrite();
             break;
-
+        }
         default:
+        {
             break;
+        }
     }
 }
 
 void Connection::onRoaster()
 {
     updateRecentOnlineTime();
+    Stanza ans;
+    std::map<std::string, Connection::ptr>::iterator it;
+    std::string strAns;
+
+    for ( it = _myServer.connections().begin();
+          it != _myServer.connections().end(); ++it )
+    {
+        JID newJID;
+        newJID.setNode( _login );
+        ans.addAvailable( newJID );
+    }
+
+    ans.setStanzaType( Stanza::ROASTER );
+    ans.save( strAns );
+
+    doWriteQuick( strAns );
 }
 
 void Connection::onLogin( Stanza st )
 {
-    std::string body = st.getMSG();
+    std::string body  = st.getMSG();
     std::string login = body.substr( 0, body.find("\n") );
     std::string psswd = body.substr( body.find("\n") );
 
     if ( _myServer.checkLoginAndPassword( login, psswd ) == true )
     {
         _login = login;
+        _loggedIn = true;
+        _myServer.addConnection( shared_from_this() );
+        retrieve();
         Stanza ans;
         ans.setStanzaType( Stanza::IQ );
-        ans.setMSG( Stanza::RESULT, "OK" );
+        ans.setSubType( Stanza::AVAILABLE );
         std::string strAns;
         ans.save( strAns );
-
-        _loggedIn = true;
-        _myServer.goOnline( login );
 
         doWriteQuick( strAns );
     } else
     {
         Stanza ans;
         ans.setStanzaType( Stanza::IQ );
-        ans.setMSG( Stanza::RESULT, "REJECTED" );
+        ans.setSubType( Stanza::ERROR );
         std::string strAns;
         ans.save( strAns );
 
@@ -228,7 +267,7 @@ void Connection::onRegister( Stanza st )
     {
         Stanza ans;
         ans.setStanzaType( Stanza::IQ );
-        ans.setMSG( Stanza::RESULT, "EXIST" );
+        ans.setSubType( Stanza::ERROR );
         std::string strAns;
         ans.save( strAns );
 
@@ -239,7 +278,7 @@ void Connection::onRegister( Stanza st )
 
         Stanza ans;
         ans.setStanzaType( Stanza::IQ );
-        ans.setMSG( Stanza::RESULT, "OK" );
+        ans.setSubType( Stanza::AVAILABLE );
         std::string strAns;
         ans.save( strAns );
 
@@ -279,7 +318,7 @@ void Connection::doWrite()
 
     std::string msg;
     _received.front().save( msg );
-    _received.pop();
+    _received.pop_front();
 
     _strWriteBuffer.resize( msg.size() );
     std::copy( msg.begin(), msg.end(), _strWriteBuffer.begin() );
@@ -295,29 +334,25 @@ void Connection::onWrite( const boost::system::error_code& err, size_t bytes )
 //        stop();
 //        return;
 //    }
+    std::cout << "On write..." << std::endl;
 
     if ( _received.empty() == false )
         doWrite();
 
-    std::cout << "On write..." << std::endl;
     doReadSize();
-}
-
-void Connection::offline()
-{
-    _started = false;
-    _loggedIn = false;
 }
 
 void Connection::stop()
 {
     std::cout << "Closing connection..." << std::endl;
+
     if ( !_started )
         return;
 
-    _started = false;
     _socket.close();
-
-    //_myServer.deleteConnection( _login );
+    _started = false;
+    _loggedIn = false;
+    store();
+    _myServer.deleteConnection( _login );
 }
 

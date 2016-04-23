@@ -9,7 +9,7 @@ class JID
         std::string domain;
         std::string resource;
     public:
-	JID(){};
+	JID() = default;
 	JID( std::string raw ){};
     JID( const JID& obj ) :
         node( obj.getNode()),
@@ -24,7 +24,7 @@ class JID
 		return *this;
 	}
 
-    ~JID(){};
+    ~JID() = default;
 
 	void setNode(std::string str)
 	{

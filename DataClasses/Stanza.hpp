@@ -26,7 +26,7 @@ class Stanza
             SIGNUP,
 			// EVENT
 			BEGIN,
-			END,			
+			END,
 
             ERROR,
 

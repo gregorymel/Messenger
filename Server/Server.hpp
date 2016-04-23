@@ -49,14 +49,14 @@ class Connection : public boost::enable_shared_from_this<Connection>, boost::non
         void doReadSize();
         void onPresence();
         void onRoaster();
-        void offline();
         void onRequest( Stanza );
         void onMessage( Stanza );
         void onLogin( Stanza );
         void onRegister( Stanza );
         void doWrite();
         void doWriteQuick( std::string msg );
-        void store( Stanza st );
+        void store();
+        void retrieve();
         void resend( Stanza st );
         void onWrite( const boost::system::error_code&, size_t );
         void onWriteQuick( const boost::system::error_code&, size_t );
@@ -112,7 +112,6 @@ class Server
         boost::asio::ip::tcp::acceptor _acceptor;
 
         std::map<std::string, Connection::ptr> _connections;
-        std::set<std::string> _online;
         std::map<std::string, Data> _accounts;
 
         Status _status;
@@ -131,8 +130,6 @@ class Server
         void deleteAccount( std::string login);
         bool checkAccount( std::string login );
         bool checkLoginAndPassword( std::string login, std::string pass );
-        void goOffline( std::string login );
-        void goOnline( std::string login );
 
         void start();
         void stop();
@@ -155,24 +152,11 @@ class Server
         {
             return _connections;
         }
-//        void addRoom( std::string name, Connection& owner );
-//        void removeRoom( std::string name );
-};
 
-//class Room
-//{
-//    private:
-//        std::string _name;
-//        std::vector<Connection> _users;
-//
-//    public:
-//        Room();
-//        Room( const Room& obj );
-//        ~Room();
-//        std::string getName();
-//        void setName( std::string name );
-//        std::vector<Connection&>& getUsers();
-//        void addUser( Connection& user );
-//};
+        std::map<std::string, Data>& accounts()
+        {
+            return _accounts;
+        }
+};
 
 #endif // SERVER_HPP

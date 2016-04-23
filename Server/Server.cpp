@@ -12,7 +12,6 @@ void Server::handleAccept( Connection::ptr connect, const boost::system::error_c
 {
     std::cout << "Handling accept..." << std::endl;
     connect->start();
-    this->addConnection( connect );
 
 	Connection::ptr newConnect = Connection::new_( *this );
 	_acceptor.async_accept( newConnect->socket(),
@@ -33,16 +32,15 @@ void Server::addConnection( Connection::ptr newConnection )
 {
     std::cout << "Connection added to the list..." << std::endl;
 
-    _connections.insert( std::pair<std::string, Connection::ptr> ( "unknown", newConnection ) );
+    _connections.insert( std::pair<std::string, Connection::ptr> ( newConnection->getLogin(), newConnection ) );
     _clientsChanged = true;
 }
 
 void Server::deleteConnection( std::string login )
 {
-    std::cout << "Deleting connection " << login << std::endl;
+    std::cout << login << " offline..." << std::endl;
 
-    _connections.erase( _connections.find( login ) );
-    _clientsChanged = true;
+    _connections.erase( login );
 }
 
 void Server::addAccount( std::string login, std::string pass )
@@ -64,10 +62,7 @@ void Server::deleteAccount( const std::string login )
 
 bool Server::checkAccount( const std::string login )
 {
-    if ( _accounts.find( login ) == _accounts.end() )
-        return false;
-
-    return true;
+    return ( _accounts.find( login ) != _accounts.end() );
 }
 
 bool Server::checkLoginAndPassword( std::string login, std::string pass )
@@ -78,20 +73,6 @@ bool Server::checkLoginAndPassword( std::string login, std::string pass )
         return false;
 
     return ( std::get<1>(*it).password == pass );
-}
-
-void Server::goOnline( std::string login )
-{
-    std::cout << login << " online..." << std::endl;
-
-    _online.insert( login );
-}
-
-void Server::goOffline( std::string login )
-{
-    std::cout << login << " offline..." << std::endl;
-
-    _online.erase( login );
 }
 
 void Server::stop()

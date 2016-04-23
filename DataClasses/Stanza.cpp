@@ -1,4 +1,5 @@
 #include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/foreach.hpp>
 #include "Stanza.hpp"
@@ -41,6 +42,10 @@ void Stanza::load(const std::string &str)
 		case IQ :
 		{
 			subType = static_cast<SubType>(pt.get<int>("Stanza.IQ.type"));
+
+			if ( subType == Stanza::SIGNIN || subType == Stanza::SIGNUP )
+                 body = pt.get<std::string>("Stanza.IQ.Body");
+
 			break;
 		}
 		case ROASTER:
@@ -62,8 +67,6 @@ void Stanza::load(const std::string &str)
 		}
 	}
 }
-
-
 
 void Stanza::save( std::string &str)
 {
@@ -99,6 +102,9 @@ void Stanza::save( std::string &str)
         case IQ :
         {
             pt.put("Stanza.IQ.type", static_cast<int>(subType));
+
+            if ( subType == Stanza::SIGNIN || subType == Stanza::SIGNUP )
+                 pt.put("Stanza.IQ.Body", body);
             break;
         }
         case ROASTER:
@@ -168,7 +174,6 @@ void Stanza::setTo( JID id)
 
 void Stanza::setMSG(SubType val, std::string msg)
 {
-	type = MESSAGE;
 	subType = val;
 	body = msg;
 }
