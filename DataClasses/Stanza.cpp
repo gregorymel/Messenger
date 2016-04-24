@@ -182,3 +182,8 @@ std::string Stanza::getMSG()
 {
 	return body;
 }
+
+void Stanza::addAvailable( JID newJID )
+{
+	availabilityList.insert(newJID);
+}
