@@ -14,11 +14,14 @@ int main(void)
 	to.setNode("TO_NODE");
 	to.setDomain("TO_DOMAIN");
 	to.setResource("TO_RESOURCE");
-
+#if 0
 	msg.setFrom( from );
 	msg.setTo( to );
 	msg.setMSG( Stanza::CHAT, "TEST EXAMPLE");
-
+#endif
+	msg.setStanzaType( Stanza::EVENT);
+	msg.setSubType( Stanza::BEGIN);
+	
 	std::string str;
 
 	msg.save(str);
