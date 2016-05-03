@@ -75,6 +75,32 @@ bool Server::checkLoginAndPassword( std::string login, std::string pass )
     return ( std::get<1>(*it).password == pass );
 }
 
+void Server::addFriend( std::string owner, std::string newFriend )
+{
+    try
+    {
+        _accounts.at( owner ).friends.insert( newFriend );
+    }
+
+    catch ( std::out_of_range )
+    {
+        return;
+    }
+}
+
+void Server::deleteFriend( std::string owner, std::string formerFriend )
+{
+    try
+    {
+        _accounts.at( owner ).friends.erase( formerFriend );
+    }
+
+    catch ( std::out_of_range )
+    {
+        return;
+    }
+}
+
 void Server::stop()
 {
 }

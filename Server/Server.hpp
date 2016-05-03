@@ -22,21 +22,29 @@ class Connection : public boost::enable_shared_from_this<Connection>, boost::non
     private:
 
         boost::asio::ip::tcp::socket _socket;
-        Server& _myServer;
-        bool _started;
-        bool _loggedIn;
         std::chrono::system_clock::time_point _wasOnline;
+        Server& _myServer;
+        bool _started;      // Has connection been started?
+        bool _loggedIn;     // Has the user logged in?
+        bool _isWaiting;    // Is the user waiting for answer? (for long-polling)
+        bool _isWriting;
 
-        std::string _login;
+
+        std::string _login;             // user 1
         std::deque<Stanza> _received;
         std::vector<JID> _friendList;
 
-        std::vector<char> _strWriteBuffer;
+        std::vector<uint8_t> _strWriteBuffer;
         std::vector<char> _strReadBuffer;
 
-        enum { max_len = 8 };
-        char _writeBuffer[max_len];
-        char _readBuffer[max_len];
+        enum { size_max_len = 8,
+               buff_max_len = 2048 };
+
+        uint8_t _writeBuffer[size_max_len];
+        uint8_t _readBuffer[size_max_len];
+
+        char _bigWriteBuffer[buff_max_len];
+        char _bigReadBuffer[buff_max_len];
 
         Connection( Server& myServer );
 
@@ -53,6 +61,7 @@ class Connection : public boost::enable_shared_from_this<Connection>, boost::non
         void onMessage( Stanza );
         void onLogin( Stanza );
         void onRegister( Stanza );
+        void startWrite();
         void doWrite();
         void doWriteQuick( std::string msg );
         void store();
@@ -60,7 +69,7 @@ class Connection : public boost::enable_shared_from_this<Connection>, boost::non
         void resend( Stanza st );
         void onWrite( const boost::system::error_code&, size_t );
         void onWriteQuick( const boost::system::error_code&, size_t );
-//        size_t readComplete( const boost::system::error_code&, size_t );
+        size_t readComplete( const boost::system::error_code&, size_t );
 
     public:
         typedef boost::shared_ptr<Connection> ptr;
@@ -94,11 +103,15 @@ class Connection : public boost::enable_shared_from_this<Connection>, boost::non
 class Server
 {
     public:
+
         typedef struct Data
         {
             std::string password;
             std::queue<Stanza> newMessages;
+            std::set<std::string> friends;
+            std::set<std::string> activeRequests;
         } Data;
+
     private:
 
         enum Status
@@ -130,6 +143,8 @@ class Server
         void deleteAccount( std::string login);
         bool checkAccount( std::string login );
         bool checkLoginAndPassword( std::string login, std::string pass );
+        void addFriend( std::string owner, std::string newFriend );
+        void deleteFriend( std::string owner, std::string newFriend );
 
         void start();
         void stop();

@@ -15,12 +15,15 @@ class Stanza
 			// message
             CHAT = 0,
             PRIVATE,
-			// presense
+			// presence
             AVAILABLE,
             UNAVAILABLE,
 			// IQ
             GET,
             SET,
+            ADD_FRIEND,
+            DELETE_FRIEND,
+            ACCEPT_FRIEND,
             RESULT,
 			SIGNIN,
             SIGNUP,
@@ -41,9 +44,9 @@ class Stanza
 			EVENT,
             MAX_STANZA_TYPE
         };
-        Stanza(){};
+        Stanza() = default;
         Stanza( JID _from, JID _to ) : from( _from), to( _to){};
-        Stanza( const Stanza &obj ){};
+        Stanza( const Stanza &obj ) = default;
         ~Stanza(){};
         StanzaType getStanzaType();
         SubType getSubType();

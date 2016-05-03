@@ -120,7 +120,7 @@ void Stanza::save( std::string &str)
         }
 		case EVENT:
 		{
-			pt.put("Stanza.EVENT.type", static_cast<int>(subType));
+			pt.put("Stanza.Event.type", static_cast<int>(subType));
 			break;
 		}
         default :
@@ -172,7 +172,7 @@ void Stanza::setTo( JID id)
 	to = id;
 }
 
-void Stanza::setMSG(SubType val, std::string msg)
+void Stanza::setMSG( SubType val, std::string msg)
 {
 	subType = val;
 	body = msg;
@@ -185,5 +185,5 @@ std::string Stanza::getMSG()
 
 void Stanza::addAvailable( JID newJID )
 {
-	availabilityList.insert(newJID);
+	availabilityList.push_front( newJID);
 }
