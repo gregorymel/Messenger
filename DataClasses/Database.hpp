@@ -1,7 +1,7 @@
 #ifndef DATABASE_HPP
 #define DATABASE_HPP
 #include "Stanza.hpp"
-#include <sqlite3.h> 
+#include <sqlite3.h>
 #include <vector>
 #include <queue>
 
@@ -11,6 +11,7 @@ class Database
 public:
 	bool OpenDatabase(std::string Name);
 	bool AddUser(std::string login, std::string password);
+	bool CheckExistence( std::string login );
 	bool CheckUser(std::string login, std::string password);
 	bool StoreMSG(Stanza msg);
 	std::queue<Stanza> getNew(std::string login);
